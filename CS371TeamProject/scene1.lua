@@ -50,6 +50,35 @@ function scene:create( event )
         }
     )
 
+	    selectedCharacter = ""
+
+    --Use tap to transition to scene 2
+    function startButton:tap(event)
+        --if event.phase == "began" then
+        composer.gotoScene(
+            "scene2",
+            {
+                effect = "slideLeft",
+                params = {
+                    character = selectedCharacter
+                }
+            }
+        )
+        return true
+        --end
+    end
+    startButton:addEventListener("tap", tap)
+
+
+
+
+
+
+
+
+
+
+
     -- Add names and start button to scene group
     sceneGroup:insert( names )
     sceneGroup:insert( startButton )
