@@ -6,8 +6,8 @@
 
 -- Your code here
 
-local bg1
-local bg2
+local starfield1
+local starfield2
 local runtime = 0
 local scrollSpeed = 1.4
 
@@ -30,64 +30,51 @@ function scene:create(event)
     local sceneGroup = self.view
 	
 
+    local function addScrollableBg()
+        local starfield = { type="image", filename="starfield.png" }
+        -- Add First bg image
+        starfield1 = display.newRect(0, 0, display.contentWidth, display.actualContentHeight)
+        starfield1.fill = starfield
+        starfield1.x = display.contentCenterX
+        starfield1.y = display.contentCenterY
 
-local function addScrollableBg()
-    local bgImage = { type="image", filename="starfield.png" }
-
-    -- Add First bg image
-    bg1 = display.newRect(0, 0, display.contentWidth, display.actualContentHeight)
-    bg1.fill = bgImage
-    bg1.x = display.contentCenterX
-    bg1.y = display.contentCenterY
-
-    -- Add Second bg image
-    bg2 = display.newRect(0, 0, display.contentWidth, display.actualContentHeight)
-    bg2.fill = bgImage
-    bg2.x = display.contentCenterX
-    bg2.y = display.contentCenterY - display.actualContentHeight
-end
-
-local function moveBg(dt)
-    bg1.y = bg1.y + scrollSpeed * dt
-    bg2.y = bg2.y + scrollSpeed * dt
-
-    if (bg1.y - display.contentHeight/2) > display.actualContentHeight then
-        bg1:translate(0, -bg1.contentHeight * 2)
+        -- Add Second bg image
+        starfield2 = display.newRect(0, 0, display.contentWidth, display.actualContentHeight)
+        starfield2.fill = starfield
+        starfield2.x = display.contentCenterX  - display.actualContentWidth
+        starfield2.y = display.contentCenterY
     end
-    if (bg2.y - display.contentHeight/2) > display.actualContentHeight then
-        bg2:translate(0, -bg2.contentHeight * 2)
+
+    local function moveBg(dt)
+        starfield1.x = starfield1.x + scrollSpeed * dt
+        starfield2.x = starfield2.x + scrollSpeed * dt
+
+        if (starfield1.x - display.contentWidth/2) > display.actualContentWidth then
+            starfield1:translate(-starfield1.contentWidth * 2, 0)
+        end
+        if (starfield2.x - display.contentWidth/2) > display.actualContentWidth then
+            starfield2:translate(-starfield2.contentWidth * 2, 0)
+        end
     end
-end
 
-local function getDeltaTime()
-   local temp = system.getTimer()
-   local dt = (temp-runtime) / (1000/60)
-   runtime = temp
-   return dt
-end
+    local function getDeltaTime()
+    local temp = system.getTimer()
+    local dt = (temp-runtime) / (1000/60)
+    runtime = temp
+    return dt
+    end
 
-local function enterFrame()
-    local dt = getDeltaTime()
-    moveBg(dt)
-end
+    local function enterFrame()
+        local dt = getDeltaTime()
+        moveBg(dt)
+    end
 
-function init()
-    addScrollableBg()
-    Runtime:addEventListener("enterFrame", enterFrame)
-end
+    function init()
+        addScrollableBg()
+        Runtime:addEventListener("enterFrame", enterFrame)
+    end
 
-init()
-
-	
-	
-
-
-
-
-
-
-
-
+    init()
 
 end
 
