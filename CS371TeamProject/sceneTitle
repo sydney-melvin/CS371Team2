@@ -52,11 +52,11 @@ function scene:create( event )
 
 	    selectedCharacter = ""
 
-    --Use tap to transition to scene 2
+    --Use tap to transition to game scene
     function startButton:tap(event)
         --if event.phase == "began" then
         composer.gotoScene(
-            "scene2",
+            "sceneGame",
             {
                 effect = "slideLeft",
                 params = {
