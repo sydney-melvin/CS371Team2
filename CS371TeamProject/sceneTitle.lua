@@ -23,7 +23,7 @@ function scene:create( event )
  
     -- Display names of group members
     local names = display.newText( 
-        "Sydney Melvin, Keenan Coleman, Mickey Stephenson, Quinton Pouncy", 
+        "Sydney Melvin, Keenan Coleman, Mickey Stephenson", 
         0, 
         0, 
         native.systemFont, 
