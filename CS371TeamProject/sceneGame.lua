@@ -19,7 +19,6 @@ local starfield1
 local starfield2
 local runtime = 0
 local scrollSpeed = 1.4
-local cnt = 0; -- counter for projectiles
 
 local score = 0 -- score counter
 local health = 5 -- health counter
@@ -41,7 +40,7 @@ function scene:create(event)
 	controlBar:setFillColor(1,1,1,0.5);
 
 	-- Create the player character
-	local player = display.newCircle(display.contentCenterX-450, display.contentHeight-150, 15);
+	local player = display.newCircle(display.contentCenterX-450, display.contentHeight/2, 15);
 	physics.addBody(player, "kinematic");
 
 	-- Function to move the player character using the control bar
@@ -66,31 +65,26 @@ function scene:create(event)
 	
 	-- Function to spawn projectiles from the player character when the screen is tapped
 	local function fire (event) 
-		if (cnt < 3) then
-			cnt = cnt+1;
-			local p = display.newCircle (player.x, player.y-16, 5);
-			p.anchorY = 1;
-			p:setFillColor(0,1,0);
-			physics.addBody (p, "dynamic", {radius=5} );
-			p:applyForce(2,0, p.x, p.y);
+		local projectile = display.newCircle (player.x, player.y-16, 5);
+		projectile.anchorY = 1;
+		projectile:setFillColor(0,1,0);
+		physics.addBody (projectile, "dynamic", {radius=5} );
+		projectile:applyForce(2,0, projectile.x, projectile.y);	
 
-			audio.play( soundTable["shootSound"] );
+		audio.play( soundTable["shootSound"] );
 
-			local function removeProjectile (event)
-				if (event.phase=="began") then
-					event.target:removeSelf();
-					event.target=nil;
-					cnt = cnt - 1;
+		local function removeProjectile (event)
+			if (event.phase=="began") then
+				event.target:removeSelf();
+				event.target=nil;
+				if (event.other.tag == "enemy") then
 
-					if (event.other.tag == "enemy") then
-
-						event.other.pp:hit();
-         	
-					end
+					event.other.pp:hit();
+		
 				end
 			end
-			p:addEventListener("collision", removeProjectile);
 		end
+		projectile:addEventListener("collision", removeProjectile);
 	end
 
 	-- Add event listener to the screen to spawn projectiles
