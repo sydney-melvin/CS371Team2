@@ -1,20 +1,11 @@
 -----------------------------------------------------------------------------------------
 --
--- scene1.lua
+-- sceneTitle.lua
 --
 -----------------------------------------------------------------------------------------
 local widget = require( "widget" )
 local composer = require( "composer" )
 local scene = composer.newScene()
- 
----------------------------------------------------------------------------------
--- All code outside of the listener functions will only be executed ONCE
--- unless "composer.removeScene()" is called.
----------------------------------------------------------------------------------
- 
--- local forward references should go here
- 
----------------------------------------------------------------------------------
  
 -- "scene:create()"
 function scene:create( event )
@@ -50,11 +41,10 @@ function scene:create( event )
         }
     )
 
-	    selectedCharacter = ""
+	selectedCharacter = ""
 
     --Use tap to transition to game scene
     function startButton:tap(event)
-        --if event.phase == "began" then
         composer.gotoScene(
             "sceneGame",
             {
@@ -65,19 +55,9 @@ function scene:create( event )
             }
         )
         return true
-        --end
     end
+
     startButton:addEventListener("tap", tap)
-
-
-
-
-
-
-
-
-
-
 
     -- Add names and start button to scene group
     sceneGroup:insert( names )

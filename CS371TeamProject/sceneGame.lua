@@ -1,190 +1,182 @@
 -----------------------------------------------------------------------------------------
 --
--- main.lua
+-- sceneGame.lua
 --
 -----------------------------------------------------------------------------------------
+-- Set up physics
+local physics = require("physics");
+physics.start();
+physics.setGravity(0,0);
+
+-- Load sound
+local soundTable=require("soundTable");
+
+-- Set up composer scene
+local composer = require("composer")
+local scene = composer.newScene()
 
 local starfield1
 local starfield2
 local runtime = 0
 local scrollSpeed = 1.4
+local cnt = 0; -- counter for projectiles
 
-local Score = 0
-local Health = 3
+local score = 0 -- score counter
+local health = 5 -- health counter
 
-
-textNum = display.newText( Score, 380, 70, native.systemFont, 36)
+-- Score display
+textNum = display.newText(score, 380, 70, native.systemFont, 36)
 textScore = display.newText("Score: ", 300, 70, native.systemFont, 36)
 
-textNum2 = display.newText( Health, 380, 120, native.systemFont, 36)
+-- Health display
+textNum2 = display.newText(health, 380, 120, native.systemFont, 36)
 textHealth = display.newText("HP: ", 300, 120, native.systemFont, 36)
-
-
-
-
-
-local composer = require("composer")
-local scene = composer.newScene()
-
----------------------------------------------------------------------------------
--- All code outside of the listener functions will only be executed ONCE
--- unless "composer.removeScene()" is called.
----------------------------------------------------------------------------------
-
--- local forward references should go here
-
----------------------------------------------------------------------------------
-
 
 -- "scene:create()"
 function scene:create(event)
     local sceneGroup = self.view
 	
-	
-	--player character
-	local physics = require("physics");
-	physics.start();
-	physics.setGravity(0,0);
-	local soundTable=require("soundTable");
-	
-	local controlBar = display.newRect (0, 320, 140, display.contentHeight);
+	-- Create the control Bar for the player character
+	local controlBar = display.newRect(0, 320, 140, display.contentHeight);
 	controlBar:setFillColor(1,1,1,0.5);
 
-	---- Main Player
-	local cube = display.newCircle (display.contentCenterX-450, display.contentHeight-150, 15);
-	physics.addBody (cube, "kinematic");
+	-- Create the player character
+	local player = display.newCircle(display.contentCenterX-450, display.contentHeight-150, 15);
+	physics.addBody(player, "kinematic");
 
+	-- Function to move the player character using the control bar
 	local function move ( event )
 		if event.phase == "began" then		
-			cube.markY = cube.y
+			player.markY = player.y
 		elseif event.phase == "moved" then	 	
-			local y = (event.y - event.yStart) + cube.markY
+			local y = (event.y - event.yStart) + player.markY
 			
-			if (y <= 20 + cube.height/2) then
-			cube.y = 20+cube.height/2;
-			elseif (y >= display.contentHeight-20-cube.height/2) then
-			cube.y = display.contentHeight-20-cube.height/2;
+			if (y <= 20 + player.height/2) then
+				player.y = 20+player.height/2;
+			elseif (y >= display.contentHeight-20-player.height/2) then
+				player.y = display.contentHeight-20-player.height/2;
 			else
-			cube.y = y;		
+				player.y = y;		
 			end
-
 		end
 	end
+
+	-- Add event listener to the control bar to move the player character
 	controlBar:addEventListener("touch", move);
-
-	-- Projectile 
-	local cnt = 0;
+	
+	-- Function to spawn projectiles from the player character when the screen is tapped
 	local function fire (event) 
-	if (cnt < 3) then
-		cnt = cnt+1;
-		local p = display.newCircle (cube.x, cube.y-16, 5);
-		p.anchorY = 1;
-		p:setFillColor(0,1,0);
-		physics.addBody (p, "dynamic", {radius=5} );
-		p:applyForce(2,0, p.x, p.y);
+		if (cnt < 3) then
+			cnt = cnt+1;
+			local p = display.newCircle (player.x, player.y-16, 5);
+			p.anchorY = 1;
+			p:setFillColor(0,1,0);
+			physics.addBody (p, "dynamic", {radius=5} );
+			p:applyForce(2,0, p.x, p.y);
 
-		audio.play( soundTable["shootSound"] );
+			audio.play( soundTable["shootSound"] );
 
-		local function removeProjectile (event)
-		if (event.phase=="began") then
-			event.target:removeSelf();
-			event.target=nil;
-			cnt = cnt - 1;
+			local function removeProjectile (event)
+				if (event.phase=="began") then
+					event.target:removeSelf();
+					event.target=nil;
+					cnt = cnt - 1;
 
-			if (event.other.tag == "enemy") then
+					if (event.other.tag == "enemy") then
 
-				event.other.pp:hit();
+						event.other.pp:hit();
          	
+					end
+				end
 			end
+			p:addEventListener("collision", removeProjectile);
 		end
-		end
-		p:addEventListener("collision", removeProjectile);
-	end
 	end
 
+	-- Add event listener to the screen to spawn projectiles
 	Runtime:addEventListener("tap", fire)
 	
-	--Enemy
-	local Enemy = require ("Enemy");
+	-- --Enemy
+	-- local Enemy = require ("Enemy");
 	
-	local Square = Enemy:new( {HP=2, fR=720, fT=700, 
-				  bT=700} );
+	-- local Square = Enemy:new( {HP=2, fR=720, fT=700, 
+	-- 			  bT=700} );
 
-	function Square:spawn()
-	self.shape = display.newRect (self.xPos, 
-    	 	 			  self.yPos, 30, 30); 
-	self.shape.pp = self;
-	self.shape.tag = "enemy";
-	self.shape:setFillColor ( 0, 1, 1);
-	physics.addBody(self.shape, "kinematic"); 
-	end
-
-
-
-	sq = Square:new({xPos=100, yPos=200});
-	sq:spawn();
-	sq:back();
-
-
-	sq2 = Square:new({xPos=150, yPos=200})
-	sq2:spawn();
-	--sq:move();
+	-- function Square:spawn()
+	-- self.shape = display.newRect (self.xPos, 
+    -- 	 	 			  self.yPos, 30, 30); 
+	-- self.shape.pp = self;
+	-- self.shape.tag = "enemy";
+	-- self.shape:setFillColor ( 0, 1, 1);
+	-- physics.addBody(self.shape, "kinematic"); 
+	-- end
 
 
 
-	function Square:back ()   
-		transition.to(self.shape, {x=self.shape.x-400, 
-				time=self.bT, rotation=self.sR, 
-		onComplete=function (obj) self:forward() end});
-	end
+	-- sq = Square:new({xPos=100, yPos=200});
+	-- sq:spawn();
+	-- sq:back();
 
-	function Square:forward ()	
-		transition.to(self.shape, {x=self.shape.x+400, 
-				time=self.fT, rotation=self.fR, 
-		onComplete= function (obj) self:back() end });
-	end
+
+	-- sq2 = Square:new({xPos=150, yPos=200})
+	-- sq2:spawn();
+	-- --sq:move();
+
+
+
+	-- function Square:back ()   
+	-- 	transition.to(self.shape, {x=self.shape.x-400, 
+	-- 			time=self.bT, rotation=self.sR, 
+	-- 	onComplete=function (obj) self:forward() end});
+	-- end
+
+	-- function Square:forward ()	
+	-- 	transition.to(self.shape, {x=self.shape.x+400, 
+	-- 			time=self.fT, rotation=self.fR, 
+	-- 	onComplete= function (obj) self:back() end });
+	-- end
 
 
 
 
 	------------Triangle
-	local Triangle = Enemy:new( {HP=3, bR=360, fT=500, 
-				     bT=300});
+	-- local Triangle = Enemy:new( {HP=3, bR=360, fT=500, 
+	-- 			     bT=300});
 
-	function Triangle:spawn()
-	self.shape = display.newPolygon(self.xPos, self.yPos, 
-			             {-15,-15,15,-15,0,15});
+	-- function Triangle:spawn()
+	-- self.shape = display.newPolygon(self.xPos, self.yPos, 
+	-- 		             {-15,-15,15,-15,0,15});
   
-	self.shape.pp = self;
-	self.shape.tag = "enemy";
-	self.shape:setFillColor ( 1, 0, 1);
-	physics.addBody(self.shape, "kinematic", 
-		     {shape={-15,-15,15,-15,0,15}}); 
-	end
+	-- self.shape.pp = self;
+	-- self.shape.tag = "enemy";
+	-- self.shape:setFillColor ( 1, 0, 1);
+	-- physics.addBody(self.shape, "kinematic", 
+	-- 	     {shape={-15,-15,15,-15,0,15}}); 
+	-- end
 
 
-	function Triangle:back ()	
-	transition.to(self.shape, {x=self.shape.x-600, 
-		y=self.shape.y-self.dist, time=self.bT, rotation=self.bR, 
-		onComplete= function (obj) self:forward() end } );
-	end
+	-- function Triangle:back ()	
+	-- transition.to(self.shape, {x=self.shape.x-600, 
+	-- 	y=self.shape.y-self.dist, time=self.bT, rotation=self.bR, 
+	-- 	onComplete= function (obj) self:forward() end } );
+	-- end
 
-	function Triangle:side ()	
-	transition.to(self.shape, {x=self.shape.x + 400, 
-      time=self.sT, rotation=self.sR, 
-      onComplete= function (obj) self:back () end });	
-	end
+	-- function Triangle:side ()	
+	-- transition.to(self.shape, {x=self.shape.x + 400, 
+    --   time=self.sT, rotation=self.sR, 
+    --   onComplete= function (obj) self:back () end });	
+	-- end
 
-	function Triangle:forward ()	
-	self.dist = math.random (40,70) * 10;
-	transition.to(self.shape, {x=self.shape.x+200,  
-		y=self.shape.y+self.dist, time=self.fT, rotation=self.fR, 
-		onComplete= function (obj) self:side() end } );
-	end
+	-- function Triangle:forward ()	
+	-- self.dist = math.random (40,70) * 10;
+	-- transition.to(self.shape, {x=self.shape.x+200,  
+	-- 	y=self.shape.y+self.dist, time=self.fT, rotation=self.fR, 
+	-- 	onComplete= function (obj) self:side() end } );
+	-- end
 
-	tr = Triangle:new({xPos=150, yPos=200});
-	tr:spawn();
-	tr:forward();
+	-- tr = Triangle:new({xPos=150, yPos=200});
+	-- tr:spawn();
+	-- tr:forward();
 
 
 
