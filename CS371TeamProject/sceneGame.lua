@@ -4,8 +4,6 @@
 --
 -----------------------------------------------------------------------------------------
 
--- Your code here
-
 local starfield1
 local starfield2
 local runtime = 0
@@ -72,7 +70,7 @@ function scene:create(event)
 
 		end
 	end
-controlBar:addEventListener("touch", move);
+	controlBar:addEventListener("touch", move);
 
 	-- Projectile 
 	local cnt = 0;
