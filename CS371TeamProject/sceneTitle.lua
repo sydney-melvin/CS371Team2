@@ -20,7 +20,7 @@ function scene:create( event )
         native.systemFont, 
         40 
     )
-    names.x = 20 ; names.y = display.contentCenterY - 200
+    names.x = 150 ; names.y = display.contentCenterY - 200
     names:setFillColor( 1, 1, 1 )
     names.anchorX = 0
 
