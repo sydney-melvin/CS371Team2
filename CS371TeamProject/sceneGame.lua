@@ -20,9 +20,11 @@ local starfield2
 local runtime = 0
 local scrollSpeed = 1.4
 local hud = nil
+local delay = 4000
 
-local score = 0 -- score counter
-local health = 5 -- health counter
+
+score = 0 -- score counter
+health = 5 -- health counter
 
 -- Score display
 textNum = display.newText(score, 380, 70, native.systemFont, 36)
@@ -42,7 +44,7 @@ function scene:create(event)
 
 	-- Create the player character
 	local player = display.newCircle(display.contentCenterX-450, display.contentHeight/2, 15);
-	physics.addBody(player, "kinematic");
+	physics.addBody(player, "dynamic");
 
 	-- Function to move the player character using the control bar
 	local function move ( event )
@@ -61,12 +63,32 @@ function scene:create(event)
 		end
 	end
 
+
+
+
+	local function playerHit(event)
+		if event.phase == "began" then
+			health = health - 1;
+			textNum2.text = health
+		else
+			if(health == 0) then
+				local GameOver = display.newText( "Game Over", display.contentCenterX, display.contentCenterY, native.systemFont, 100 )
+
+				
+			end
+		end
+	end
+
+	player:addEventListener("collision", playerHit); 
+
+
+
 	-- Add event listener to the control bar to move the player character
 	controlBar:addEventListener("touch", move);
 	
 	-- Function to spawn projectiles from the player character when the screen is tapped
 	local function fire (event) 
-		local projectile = display.newCircle (player.x, player.y-16, 5);
+		local projectile = display.newCircle (player.x + 25, player.y, 5);
 		projectile.anchorY = 1;
 		projectile:setFillColor(0,1,0);
 		physics.addBody (projectile, "dynamic", {radius=5} );
@@ -79,8 +101,13 @@ function scene:create(event)
 				event.target:removeSelf();
 				event.target=nil;
 				if (event.other.tag == "enemy") then
-
+					if(event.other.pp:getHealth() == 1) then
+						score = score + 100;
+						textNum.text = score
+					
+					end
 					event.other.pp:hit();
+					
 		
 				end
 			end
@@ -92,87 +119,25 @@ function scene:create(event)
 	Runtime:addEventListener("tap", fire)
 	
 	--Enemy
-	local Enemy = require ("Enemy");
+	local Enemy1 = require ("Enemy1");
+	local Enemy2 = require ("Enemy2");
+
 	
-	local Square = Enemy:new( {HP=2, fR=720, fT=700, 
-				  bT=700} );
-
-	function Square:spawn()
-	self.shape = display.newRect (self.xPos, 
-    	 	 			  self.yPos, 30, 30); 
-	self.shape.pp = self;
-	self.shape.tag = "enemy";
-	self.shape:setFillColor ( 0, 1, 1);
-	physics.addBody(self.shape, "kinematic"); 
+	function spawner()
+	--Square
+		en1 = Enemy1:new({xPos=1200, yPos= math.random(1, 640)});
+		en1:spawn();
+		en1:move();
+	--Triangle
+		en2 = Enemy2:new({xPos=1200, yPos=math.random(1, 640)});
+		en2:spawn();
+		en2:move();
 	end
-
-
-
-	sq = Square:new({xPos=100, yPos=200});
-	sq:spawn();
-	sq:back();
-
-
-	sq2 = Square:new({xPos=150, yPos=200})
-	sq2:spawn();
-	--sq:move();
-
-
-
-	function Square:back ()   
-		transition.to(self.shape, {x=self.shape.x-400, 
-				time=self.bT, rotation=self.sR, 
-		onComplete=function (obj) self:forward() end});
-	end
-
-	function Square:forward ()	
-		transition.to(self.shape, {x=self.shape.x+400, 
-				time=self.fT, rotation=self.fR, 
-		onComplete= function (obj) self:back() end });
-	end
-
-
-
-
-	----------Triangle
-	local Triangle = Enemy:new( {HP=3, bR=360, fT=500, 
-				     bT=300});
-
-	function Triangle:spawn()
-	self.shape = display.newPolygon(self.xPos, self.yPos, 
-			             {-15,-15,15,-15,0,15});
-  
-	self.shape.pp = self;
-	self.shape.tag = "enemy";
-	self.shape:setFillColor ( 1, 0, 1);
-	physics.addBody(self.shape, "kinematic", 
-		     {shape={-15,-15,15,-15,0,15}}); 
-	end
-
-
-	function Triangle:back ()	
-	transition.to(self.shape, {x=self.shape.x-600, 
-		y=self.shape.y-self.dist, time=self.bT, rotation=self.bR, 
-		onComplete= function (obj) self:forward() end } );
-	end
-
-	function Triangle:side ()	
-	transition.to(self.shape, {x=self.shape.x + 400, 
-      time=self.sT, rotation=self.sR, 
-      onComplete= function (obj) self:back () end });	
-	end
-
-	function Triangle:forward ()	
-	self.dist = math.random (40,70) * 10;
-	transition.to(self.shape, {x=self.shape.x+200,  
-		y=self.shape.y+self.dist, time=self.fT, rotation=self.fR, 
-		onComplete= function (obj) self:side() end } );
-	end
-
-	tr = Triangle:new({xPos=150, yPos=200});
-	tr:spawn();
-	tr:forward();
-
+	
+	local spawnEnemies = timer.performWithDelay(delay, spawner, 100)
+	
+	
+	
 
 
     local function addScrollableBg()

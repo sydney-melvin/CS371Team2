@@ -1,6 +1,8 @@
+
+local physics = require("physics");
 local soundTable=require("soundTable");
 
-local Enemy = {tag="enemy", HP=1, xPos=0, yPos=0, fR=0, sR=0, bR=0, fT=1000, sT=500, bT	=500};
+local Enemy = {tag="enemy", HP=1, xPos=0, yPos=0, fR=0, sR=0, bR=0, fT=1000, sT=500, bT	=500, red=1, green=1, blue=0};
 
 function Enemy:new (o)    --constructor
   o = o or {}; 
@@ -13,27 +15,26 @@ function Enemy:spawn()
  self.shape=display.newCircle(self.xPos, self.yPos,15);
  self.shape.pp = self;  -- parent object
  self.shape.tag = self.tag; -- “enemy”
- self.shape:setFillColor (1,1,0);
+ self.shape:setFillColor (self.red,self.green,self.blue);
  physics.addBody(self.shape, "kinematic"); 
 end
 
 
 function Enemy:back ()
-  transition.to(self.shape, {x=self.shape.x+100, y=150,  
+  transition.to(self.shape, {x=self.shape.x, y=150,  
   time=self.fB, rotation=self.bR, 
   onComplete=function (obj) self:forward() end} );
 end
 
 function Enemy:side ()   
-   transition.to(self.shape, {x=self.shape.x-200, 
+   transition.to(self.shape, {x=self.shape.x, 
    time=self.fS, rotation=self.sR, 
    onComplete=function (obj) self:back() end } );
 end
 
 function Enemy:forward ()   
-   transition.to(self.shape, {x=self.shape.x+100, y=800, 
-   time=self.fT, rotation=self.fR, 
-   onComplete= function (obj) self:side() end } );
+   transition.to(self.shape, {x=self.shape.x, y=800, 
+   time=self.fT, rotation=self.fR } );
 end
 
 function Enemy:move ()	
@@ -58,33 +59,21 @@ function Enemy:hit ()
 		-- die
 		self.shape:removeSelf();
 		self.shape=nil;	
+
 		--self = nil;  
 	end		
 end
 
-
-function Enemy:shoot (interval)
-  interval = interval or 1500;
-  local function createShot(obj)
-    local p = display.newRect (obj.shape.x, obj.shape.y+50, 
-                               10,10);
-    p:setFillColor(1,0,0);
-    p.anchorY=0;
-    physics.addBody (p, "dynamic");
-    p:applyForce(0, 1, p.x, p.y);
-		
-    local function shotHandler (event)
-      if (event.phase == "began") then
-	  event.target:removeSelf();
-   	  event.target = nil;
-      end
-    end
-    p:addEventListener("collision", shotHandler);		
-  end
-  self.timerRef = timer.performWithDelay(interval, 
-	function (event) createShot(self) end, -1);
+function Enemy:getHealth () 
+	return self.HP;
 end
 
 
-return Enemy
 
+function Enemy:offScreen()
+	self.shape:removeSelf();
+	self.shape=nil;	
+
+end
+
+return Enemy
