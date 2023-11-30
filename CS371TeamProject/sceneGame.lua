@@ -19,6 +19,7 @@ local starfield1
 local starfield2
 local runtime = 0
 local scrollSpeed = 1.4
+local hud = nil
 
 local score = 0 -- score counter
 local health = 5 -- health counter
@@ -90,87 +91,87 @@ function scene:create(event)
 	-- Add event listener to the screen to spawn projectiles
 	Runtime:addEventListener("tap", fire)
 	
-	-- --Enemy
-	-- local Enemy = require ("Enemy");
+	--Enemy
+	local Enemy = require ("Enemy");
 	
-	-- local Square = Enemy:new( {HP=2, fR=720, fT=700, 
-	-- 			  bT=700} );
+	local Square = Enemy:new( {HP=2, fR=720, fT=700, 
+				  bT=700} );
 
-	-- function Square:spawn()
-	-- self.shape = display.newRect (self.xPos, 
-    -- 	 	 			  self.yPos, 30, 30); 
-	-- self.shape.pp = self;
-	-- self.shape.tag = "enemy";
-	-- self.shape:setFillColor ( 0, 1, 1);
-	-- physics.addBody(self.shape, "kinematic"); 
-	-- end
-
-
-
-	-- sq = Square:new({xPos=100, yPos=200});
-	-- sq:spawn();
-	-- sq:back();
-
-
-	-- sq2 = Square:new({xPos=150, yPos=200})
-	-- sq2:spawn();
-	-- --sq:move();
+	function Square:spawn()
+	self.shape = display.newRect (self.xPos, 
+    	 	 			  self.yPos, 30, 30); 
+	self.shape.pp = self;
+	self.shape.tag = "enemy";
+	self.shape:setFillColor ( 0, 1, 1);
+	physics.addBody(self.shape, "kinematic"); 
+	end
 
 
 
-	-- function Square:back ()   
-	-- 	transition.to(self.shape, {x=self.shape.x-400, 
-	-- 			time=self.bT, rotation=self.sR, 
-	-- 	onComplete=function (obj) self:forward() end});
-	-- end
+	sq = Square:new({xPos=100, yPos=200});
+	sq:spawn();
+	sq:back();
 
-	-- function Square:forward ()	
-	-- 	transition.to(self.shape, {x=self.shape.x+400, 
-	-- 			time=self.fT, rotation=self.fR, 
-	-- 	onComplete= function (obj) self:back() end });
-	-- end
+
+	sq2 = Square:new({xPos=150, yPos=200})
+	sq2:spawn();
+	--sq:move();
 
 
 
+	function Square:back ()   
+		transition.to(self.shape, {x=self.shape.x-400, 
+				time=self.bT, rotation=self.sR, 
+		onComplete=function (obj) self:forward() end});
+	end
 
-	------------Triangle
-	-- local Triangle = Enemy:new( {HP=3, bR=360, fT=500, 
-	-- 			     bT=300});
+	function Square:forward ()	
+		transition.to(self.shape, {x=self.shape.x+400, 
+				time=self.fT, rotation=self.fR, 
+		onComplete= function (obj) self:back() end });
+	end
 
-	-- function Triangle:spawn()
-	-- self.shape = display.newPolygon(self.xPos, self.yPos, 
-	-- 		             {-15,-15,15,-15,0,15});
+
+
+
+	----------Triangle
+	local Triangle = Enemy:new( {HP=3, bR=360, fT=500, 
+				     bT=300});
+
+	function Triangle:spawn()
+	self.shape = display.newPolygon(self.xPos, self.yPos, 
+			             {-15,-15,15,-15,0,15});
   
-	-- self.shape.pp = self;
-	-- self.shape.tag = "enemy";
-	-- self.shape:setFillColor ( 1, 0, 1);
-	-- physics.addBody(self.shape, "kinematic", 
-	-- 	     {shape={-15,-15,15,-15,0,15}}); 
-	-- end
+	self.shape.pp = self;
+	self.shape.tag = "enemy";
+	self.shape:setFillColor ( 1, 0, 1);
+	physics.addBody(self.shape, "kinematic", 
+		     {shape={-15,-15,15,-15,0,15}}); 
+	end
 
 
-	-- function Triangle:back ()	
-	-- transition.to(self.shape, {x=self.shape.x-600, 
-	-- 	y=self.shape.y-self.dist, time=self.bT, rotation=self.bR, 
-	-- 	onComplete= function (obj) self:forward() end } );
-	-- end
+	function Triangle:back ()	
+	transition.to(self.shape, {x=self.shape.x-600, 
+		y=self.shape.y-self.dist, time=self.bT, rotation=self.bR, 
+		onComplete= function (obj) self:forward() end } );
+	end
 
-	-- function Triangle:side ()	
-	-- transition.to(self.shape, {x=self.shape.x + 400, 
-    --   time=self.sT, rotation=self.sR, 
-    --   onComplete= function (obj) self:back () end });	
-	-- end
+	function Triangle:side ()	
+	transition.to(self.shape, {x=self.shape.x + 400, 
+      time=self.sT, rotation=self.sR, 
+      onComplete= function (obj) self:back () end });	
+	end
 
-	-- function Triangle:forward ()	
-	-- self.dist = math.random (40,70) * 10;
-	-- transition.to(self.shape, {x=self.shape.x+200,  
-	-- 	y=self.shape.y+self.dist, time=self.fT, rotation=self.fR, 
-	-- 	onComplete= function (obj) self:side() end } );
-	-- end
+	function Triangle:forward ()	
+	self.dist = math.random (40,70) * 10;
+	transition.to(self.shape, {x=self.shape.x+200,  
+		y=self.shape.y+self.dist, time=self.fT, rotation=self.fR, 
+		onComplete= function (obj) self:side() end } );
+	end
 
-	-- tr = Triangle:new({xPos=150, yPos=200});
-	-- tr:spawn();
-	-- tr:forward();
+	tr = Triangle:new({xPos=150, yPos=200});
+	tr:spawn();
+	tr:forward();
 
 
 
