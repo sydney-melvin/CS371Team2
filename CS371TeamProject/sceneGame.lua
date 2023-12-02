@@ -69,43 +69,6 @@ function scene:create(event)
 		end
 	end
 
-	local function restartGame()
-		composer.gotoScene(
-            "sceneTitle",
-            {
-                effect = "slideRight",
-            }
-        )
-	end
-
-	--True if player won, False if player lost
-	local function gameOver(playerWon)
-		local gameOverString = playerWon and "You Won!" or "You lost! Game Over."
-		gameOverText = display.newText(gameOverString, display.contentCenterX, display.contentCenterY, native.systemFont, 100)
-		sceneGroup:insert(gameOverText)
-		Runtime:removeEventListener("tap", fire)
-		Runtime:addEventListener("tap", restartGame)
-	end
-
-	-- Function to handle collisions between the player character and other objects
-	local function playerHit(event)
-		if event.phase == "began" then
-			health = health - 1;
-			textNum2.text = health
-			if(health <= 0) then
-				--Player Lost
-				gameOver(false)
-			end
-			if (event.other.tag == "enemy" or event.other.tag == "boss") then
-				event.other.pp:offScreen();
-			end
-		end
-	end
-
-	player:addEventListener("collision", playerHit); 
-
-
-
 	-- Add event listener to the control bar to move the player character
 	controlBar:addEventListener("touch", move);
 	
@@ -237,7 +200,42 @@ function scene:create(event)
     end
 
     init()
+	
+	local function restartGame()
+		Runtime:removeEventListener("tap", restartGame)
+		composer.gotoScene(
+            "sceneTitle",
+            {
+                effect = "slideRight",
+            }
+        )
+	end
 
+	--True if player won, False if player lost
+	local function gameOver(playerWon)
+		local gameOverString = playerWon and "You Won!" or "You lost! Game Over."
+		gameOverText = display.newText(gameOverString, display.contentCenterX, display.contentCenterY, native.systemFont, 100)
+		sceneGroup:insert(gameOverText)
+		Runtime:removeEventListener("tap", fire)
+		Runtime:addEventListener("tap", restartGame)
+	end
+
+	-- Function to handle collisions between the player character and other objects
+	local function playerHit(event)
+		if event.phase == "began" then
+			health = health - 1;
+			textNum2.text = health
+			if(health <= 0) then
+				--Player Lost
+				gameOver(false)
+			end
+			if (event.other.tag == "enemy" or event.other.tag == "boss") then
+				event.other.pp:offScreen();
+			end
+		end
+	end
+
+	player:addEventListener("collision", playerHit); 
 end
 
 -- "scene:show()"
