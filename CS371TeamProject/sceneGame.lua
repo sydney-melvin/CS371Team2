@@ -33,17 +33,28 @@ textScore = display.newText("Score: ", 300, 70, native.systemFont, 36)
 textNum2 = display.newText(health, 380, 120, native.systemFont, 36)
 textHealth = display.newText("HP: ", 300, 120, native.systemFont, 36)
 
+local sceneGroup = display.newGroup()
+sceneGroup:insert(textNum)
+sceneGroup:insert(textScore)
+sceneGroup:insert(textNum2)
+sceneGroup:insert(textHealth)
 -- "scene:create()"
 function scene:create(event)
-    local sceneGroup = self.view
 	
+	score = 0
+	health = 5
+	textNum.text = health
+	textNum2 = score
+
 	-- Create the control Bar for the player character
 	local controlBar = display.newRect(0, 320, 140, display.contentHeight);
 	controlBar:setFillColor(1,1,1,0.5);
+	sceneGroup:insert(controlBar)
 
 	-- Create the player character
 	local player = display.newCircle(display.contentCenterX-450, display.contentHeight/2, 15);
 	physics.addBody(player, "dynamic");
+	sceneGroup:insert(player)
 
 	-- Function to move the player character using the control bar
 	local function move ( event )
@@ -75,6 +86,7 @@ function scene:create(event)
 	local function gameOver(playerWon)
 		local gameOverString = playerWon and "You Won!" or "You lost! Game Over."
 		gameOverText = display.newText(gameOverString, display.contentCenterX, display.contentCenterY, native.systemFont, 100)
+		sceneGroup:insert(gameOverText)
 		Runtime:removeEventListener("tap", fire)
 		Runtime:addEventListener("tap", restartGame)
 	end
@@ -155,6 +167,7 @@ function scene:create(event)
 			bossSpawned = true
 
 			local boss = Boss:new({xPos=1200, yPos=math.random(1, 640)});
+			--sceneGroup:insert(boss)
 			boss:spawn();
 			boss:move();
 			boss:shoot();
@@ -167,12 +180,14 @@ function scene:create(event)
 		elseif not bossSpawned then
 			--Square
 			en1 = Enemy1:new({xPos=1200, yPos= math.random(1, 640)});
+			--sceneGroup:insert(en1)
 			en1:spawn();
 			en1:move();
 			table.insert(enemies, en1)
 
 			--Triangle
 			en2 = Enemy2:new({xPos=1200, yPos=math.random(1, 640)});
+			--sceneGroup:insert(en2)
 			en2:spawn();
 			en2:move();
 			table.insert(enemies, en2)
@@ -231,7 +246,6 @@ end
 
 -- "scene:show()"
 function scene:show(event)
-    local sceneGroup = self.view
     local phase = event.phase
 
     if (phase == "will") then
@@ -249,21 +263,18 @@ end
 
 -- "scene:hide()"
 function scene:hide(event)
-    local sceneGroup = self.view
     local phase = event.phase
 
     if (phase == "will") then
         -- Called when the scene is on screen (but is about to go off screen).
         -- Insert code here to "pause" the scene.
         -- Example: stop timers, stop animation, stop audio, etc.
-
-		display.remove(player)
-		display.remove(controlBar)
-		display.remove(textNum)
-		display.remove(textScore)
-		display.remove(textNum2)
-		display.remove(textHealth)
-		display.remove(gameOverText)
+		starfield1.isVisible = false
+		starfield2.isVisible = false
+		for i = sceneGroup.numChildren, 1, -1 do
+            local child = sceneGroup[i]
+            display.remove(child)
+        end
     elseif (phase == "did") then
     -- Called immediately after scene goes off screen.
     end
@@ -271,7 +282,6 @@ end
 
 -- "scene:destroy()"
 function scene:destroy(event)
-    local sceneGroup = self.view
 
     -- Called prior to the removal of scene's view ("sceneGroup").
     -- Insert code here to clean up the scene.
