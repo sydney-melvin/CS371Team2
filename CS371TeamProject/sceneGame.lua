@@ -38,6 +38,7 @@ sceneGroup:insert(textNum)
 sceneGroup:insert(textScore)
 sceneGroup:insert(textNum2)
 sceneGroup:insert(textHealth)
+
 -- "scene:create()"
 function scene:create(event)
 	
@@ -276,7 +277,8 @@ end
 
 -- "scene:destroy()"
 function scene:destroy(event)
-
+	local sceneGroup = self.view
+   	sceneGroup:removeSelf()
     -- Called prior to the removal of scene's view ("sceneGroup").
     -- Insert code here to clean up the scene.
     -- Example: remove display objects, save state, etc.
