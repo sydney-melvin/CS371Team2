@@ -1,25 +1,7 @@
------------------------------------------------------------------------------------------
---
--- main.lua
---
------------------------------------------------------------------------------------------
+local Enemy = require("Enemy");
+local soundTable=require("soundTable");
 
---used to move fish into random locations on the screen 
-function update()
-	
-	if(canMove == false) then
-		math.randomseed(os.time())
-		transition.moveTo(fish, {x = display.contentWidth / 2 + math.random(-300, 300), y = display.contentHeight / 2 + math.random(-200, 200), time = 4000})
-	else
-		transition.cancel(fish)
-		
-	end
-
-end
-
-local KingBayonet = {}
-
-function KingBayonet:createFish()
+function createFish()
 	--group where all body parts will be placed
 	local fish = display.newGroup()
 
@@ -149,3 +131,46 @@ function KingBayonet:createFish()
 
 	return fish
 end
+
+local Boss = Enemy:new( { HP=30 } );
+
+function Boss:spawn()
+  self.shape = createFish();
+  self.shape.x = self.xPos;
+  self.shape.y = self.yPos;
+  self.shape.pp = self;
+  self.shape.tag = "boss";
+  physics.addBody(self.shape, "kinematic"); 
+end
+
+function Boss:move()
+  transition.to (
+    self.shape, {
+        x = math.random(display.contentCenterX-450, display.contentWidth),
+        y = math.random(0, display.contentHeight),
+        time = 1000, 
+        onComplete = function() self:move() end
+    }
+  )	
+end
+
+function Boss:hit () 
+	self.HP = self.HP - 1;
+	if (self.HP > 0) then 
+		audio.play( soundTable["hitSound"] );
+	else 
+		audio.play( soundTable["explodeSound"] );
+		
+    transition.cancel( self.shape );
+		
+		if (self.timerRef ~= nil) then
+			timer.cancel ( self.timerRef );
+		end
+
+		-- die
+		self.shape:removeSelf();
+		self.shape=nil;	
+	end		
+end
+
+return Boss;

@@ -59,8 +59,6 @@ function Enemy:hit ()
 		-- die
 		self.shape:removeSelf();
 		self.shape=nil;	
-
-		--self = nil;  
 	end		
 end
 
@@ -68,12 +66,37 @@ function Enemy:getHealth ()
 	return self.HP;
 end
 
-
-
 function Enemy:offScreen()
-	self.shape:removeSelf();
-	self.shape=nil;	
+  if self.shape then
+    self.shape:removeSelf();
+	  self.shape=nil;	
+  end
+end
 
+function Enemy:shoot (interval)
+  interval = interval or 1500;
+
+  local function createShot(obj)
+    local p = display.newRect(obj.shape.x - 120, obj.shape.y + 10, 10, 10);
+    p:setFillColor(1, 0, 0);
+    p.anchorY = 0;
+    physics.addBody(p, "dynamic");
+    p:applyForce(-2, 0, p.x, p.y);
+		
+    local function shotHandler (event)
+      if (event.phase == "began" and event.other.tag ~= 'enemy') then
+	      event.target:removeSelf();
+   	    event.target = nil;
+      end
+    end
+    p:addEventListener("collision", shotHandler);		
+  end
+
+  self.timerRef = timer.performWithDelay(
+    interval, 
+    function (event) createShot(self) end,
+    -1
+  );
 end
 
 return Enemy

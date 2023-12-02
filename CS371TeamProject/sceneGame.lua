@@ -22,12 +22,11 @@ local scrollSpeed = 1.4
 local hud = nil
 local delay = 4000
 
-
 score = 0 -- score counter
 health = 5 -- health counter
 
 -- Score display
-textNum = display.newText(score, 380, 70, native.systemFont, 36)
+textNum = display.newText(score, 400, 70, native.systemFont, 36)
 textScore = display.newText("Score: ", 300, 70, native.systemFont, 36)
 
 -- Health display
@@ -63,18 +62,13 @@ function scene:create(event)
 		end
 	end
 
-
-
-
 	local function playerHit(event)
 		if event.phase == "began" then
 			health = health - 1;
 			textNum2.text = health
 		else
-			if(health == 0) then
+			if(health <= 0) then
 				local GameOver = display.newText( "Game Over", display.contentCenterX, display.contentCenterY, native.systemFont, 100 )
-
-				
 			end
 		end
 	end
@@ -101,14 +95,17 @@ function scene:create(event)
 				event.target:removeSelf();
 				event.target=nil;
 				if (event.other.tag == "enemy") then
-					if(event.other.pp:getHealth() == 1) then
+					event.other.pp:hit();
+					if(event.other.pp:getHealth() <= 0) then
 						score = score + 100;
 						textNum.text = score
-					
 					end
+				elseif (event.other.tag == "boss") then
 					event.other.pp:hit();
-					
-		
+					if(event.other.pp:getHealth() <= 0) then
+						score = score + 10000;
+						textNum.text = score
+					end
 				end
 			end
 		end
@@ -121,24 +118,46 @@ function scene:create(event)
 	--Enemy
 	local Enemy1 = require ("Enemy1");
 	local Enemy2 = require ("Enemy2");
+	local Boss = require ("Boss");
 
-	
+	local bossLevelDuration = 120 -- 2 minutes in seconds
+	local elapsedTime = 0
+	local bossSpawned = false
+	local enemies = {}
+
 	function spawner()
-	--Square
-		en1 = Enemy1:new({xPos=1200, yPos= math.random(1, 640)});
-		en1:spawn();
-		en1:move();
-	--Triangle
-		en2 = Enemy2:new({xPos=1200, yPos=math.random(1, 640)});
-		en2:spawn();
-		en2:move();
+		elapsedTime = elapsedTime + 4
+
+		-- Check if the elapsed time has reached the boss level duration
+		if elapsedTime > bossLevelDuration and not bossSpawned then
+			bossSpawned = true
+
+			local boss = Boss:new({xPos=1200, yPos=math.random(1, 640)});
+			boss:spawn();
+			boss:move();
+			boss:shoot();
+
+			-- loop over all items in the enemies array
+			for i = #enemies, 1, -1 do
+				local enemy = enemies[i]
+				enemy:offScreen()
+			end
+		elseif not bossSpawned then
+			--Square
+			en1 = Enemy1:new({xPos=1200, yPos= math.random(1, 640)});
+			en1:spawn();
+			en1:move();
+			table.insert(enemies, en1)
+
+			--Triangle
+			en2 = Enemy2:new({xPos=1200, yPos=math.random(1, 640)});
+			en2:spawn();
+			en2:move();
+			table.insert(enemies, en2)
+		end
 	end
 	
 	local spawnEnemies = timer.performWithDelay(delay, spawner, 100)
-	
-	
-	
-
 
     local function addScrollableBg()
         local starfield = { type="image", filename="starfield.png" }
