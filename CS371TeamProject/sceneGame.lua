@@ -63,6 +63,23 @@ function scene:create(event)
 		end
 	end
 
+	local function restartGame()
+		composer.gotoScene(
+            "sceneTitle",
+            {
+                effect = "slideRight",
+            }
+        )
+	end
+
+	--True if player won, False if player lost
+	local function gameOver(playerWon)
+		local gameOverString = playerWon and "You Won!" or "You lost! Game Over."
+		gameOverText = display.newText(gameOverString, display.contentCenterX, display.contentCenterY, native.systemFont, 100)
+		Runtime:removeEventListener("tap", fire)
+		Runtime:addEventListener("tap", restartGame)
+	end
+
 
 
 
@@ -70,12 +87,13 @@ function scene:create(event)
 		if event.phase == "began" then
 			health = health - 1;
 			textNum2.text = health
-		else
 			if(health == 0) then
-				local GameOver = display.newText( "Game Over", display.contentCenterX, display.contentCenterY, native.systemFont, 100 )
-
+				--Player Lost
+				gameOver(false)
 				
 			end
+		else
+
 		end
 	end
 
@@ -95,6 +113,7 @@ function scene:create(event)
 		projectile:applyForce(2,0, projectile.x, projectile.y);	
 
 		audio.play( soundTable["shootSound"] );
+		projectile.parent = player
 
 		local function removeProjectile (event)
 			if (event.phase=="began") then
@@ -215,6 +234,14 @@ function scene:hide(event)
         -- Called when the scene is on screen (but is about to go off screen).
         -- Insert code here to "pause" the scene.
         -- Example: stop timers, stop animation, stop audio, etc.
+
+		display.remove(player)
+		display.remove(controlBar)
+		display.remove(textNum)
+		display.remove(textScore)
+		display.remove(textNum2)
+		display.remove(textHealth)
+		display.remove(gameOverText)
     elseif (phase == "did") then
     -- Called immediately after scene goes off screen.
     end
