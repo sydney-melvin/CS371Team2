@@ -22,27 +22,37 @@ local scrollSpeed = 1.4
 local hud = nil
 local delay = 4000
 
-score = 0 -- score counter
-health = 5 -- health counter
 
--- Score display
-textNum = display.newText(score, 400, 70, native.systemFont, 36)
-textScore = display.newText("Score: ", 300, 70, native.systemFont, 36)
-
--- Health display
-textNum2 = display.newText(health, 380, 120, native.systemFont, 36)
-textHealth = display.newText("HP: ", 300, 120, native.systemFont, 36)
-
+local enemies = {}
 local sceneGroup = display.newGroup()
-sceneGroup:insert(textNum)
-sceneGroup:insert(textScore)
-sceneGroup:insert(textNum2)
-sceneGroup:insert(textHealth)
 -- "scene:create()"
 function scene:create(event)
 	
 
-	-- Create the control Bar for the player character
+	
+end
+
+-- "scene:show()"
+function scene:show(event)
+    local phase = event.phase
+
+    if (phase == "will") then
+
+	score = 0
+	health = 5
+	-- Score display
+	textNum = display.newText(score, 400, 70, native.systemFont, 36)
+	textScore = display.newText("Score: ", 300, 70, native.systemFont, 36)
+	sceneGroup:insert(textNum)
+	sceneGroup:insert(textScore)
+
+	-- Health display
+	textNum2 = display.newText(health, 380, 120, native.systemFont, 36)
+	textHealth = display.newText("HP: ", 300, 120, native.systemFont, 36)
+	sceneGroup:insert(textNum2)
+	sceneGroup:insert(textHealth)
+
+		-- Create the control Bar for the player character
 	local controlBar = display.newRect(0, 320, 140, display.contentHeight);
 	controlBar:setFillColor(1,1,1,0.5);
 	sceneGroup:insert(controlBar)
@@ -98,6 +108,7 @@ function scene:create(event)
 					if(event.other.pp:getHealth() <= 0) then
 						score = score + 10000;
 						textNum.text = score
+						gameOver(true)
 					end
 				end
 			end
@@ -116,7 +127,6 @@ function scene:create(event)
 	local bossLevelDuration = 120 -- 2 minutes in seconds
 	local elapsedTime = 0
 	local bossSpawned = false
-	local enemies = {}
 
 	function spawner()
 		elapsedTime = elapsedTime + 4
@@ -142,6 +152,7 @@ function scene:create(event)
 			--sceneGroup:insert(en1)
 			en1:spawn();
 			en1:move();
+			sceneGroup:insert(en1.shape)
 			table.insert(enemies, en1)
 
 			--Triangle
@@ -149,6 +160,7 @@ function scene:create(event)
 			--sceneGroup:insert(en2)
 			en2:spawn();
 			en2:move();
+			sceneGroup:insert(en2.shape)
 			table.insert(enemies, en2)
 		end
 	end
@@ -203,10 +215,12 @@ function scene:create(event)
 	
 	local function restartGame()
 		Runtime:removeEventListener("tap", restartGame)
+		timer.cancel(spawnEnemies)
 		composer.gotoScene(
             "sceneTitle",
             {
                 effect = "slideRight",
+				time = 4000
             }
         )
 	end
@@ -236,15 +250,6 @@ function scene:create(event)
 	end
 
 	player:addEventListener("collision", playerHit); 
-end
-
--- "scene:show()"
-function scene:show(event)
-    local phase = event.phase
-
-    if (phase == "will") then
-
-
         -- Called when the scene is still off screen (but is about to come on screen).
     elseif (phase == "did") then
 		
@@ -263,12 +268,17 @@ function scene:hide(event)
         -- Called when the scene is on screen (but is about to go off screen).
         -- Insert code here to "pause" the scene.
         -- Example: stop timers, stop animation, stop audio, etc.
+
 		starfield1.isVisible = false
 		starfield2.isVisible = false
 		for i = sceneGroup.numChildren, 1, -1 do
             local child = sceneGroup[i]
             display.remove(child)
         end
+		for i = 1, #enemies do
+			local enemy = enemies[i]
+			enemy:offScreen()
+		end
     elseif (phase == "did") then
     -- Called immediately after scene goes off screen.
     end
