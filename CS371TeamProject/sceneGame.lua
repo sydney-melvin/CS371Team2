@@ -41,10 +41,6 @@ sceneGroup:insert(textHealth)
 -- "scene:create()"
 function scene:create(event)
 	
-	score = 0
-	health = 5
-	textNum.text = health
-	textNum2 = score
 
 	-- Create the control Bar for the player character
 	local controlBar = display.newRect(0, 320, 140, display.contentHeight);
