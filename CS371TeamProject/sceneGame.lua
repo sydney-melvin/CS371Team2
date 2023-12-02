@@ -129,7 +129,7 @@ function scene:show(event)
 	local bossSpawned = false
 
 	function spawner()
-		elapsedTime = elapsedTime + 4
+		elapsedTime = elapsedTime + 40
 
 		-- Check if the elapsed time has reached the boss level duration
 		if elapsedTime > bossLevelDuration and not bossSpawned then
@@ -244,8 +244,10 @@ function scene:show(event)
 				--Player Lost
 				gameOver(false)
 			end
-			if (event.other.tag == "enemy" or event.other.tag == "boss") then
+			if (event.other.tag == "enemy") then
 				event.other.pp:offScreen();
+			elseif (event.other.tag == "enemyShot") then
+				event.other:removeSelf();
 			end
 		end
 	end

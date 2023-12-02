@@ -82,9 +82,10 @@ function Enemy:shoot (interval)
     p.anchorY = 0;
     physics.addBody(p, "dynamic");
     p:applyForce(-2, 0, p.x, p.y);
+    p.tag = "enemyShot";
 		
     local function shotHandler (event)
-      if (event.phase == "began" and event.other.tag ~= 'enemy') then
+      if (event.phase == "began") then
 	      event.target:removeSelf();
    	    event.target = nil;
       end
