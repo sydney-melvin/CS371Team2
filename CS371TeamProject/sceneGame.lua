@@ -79,9 +79,7 @@ function scene:create(event)
 		Runtime:addEventListener("tap", restartGame)
 	end
 
-
-
-
+	-- Function to handle collisions between the player character and other objects
 	local function playerHit(event)
 		if event.phase == "began" then
 			health = health - 1;
@@ -89,10 +87,10 @@ function scene:create(event)
 			if(health <= 0) then
 				--Player Lost
 				gameOver(false)
-				
 			end
-		else
-
+			if (event.other.tag == "enemy" or event.other.tag == "boss") then
+				event.other.pp:offScreen();
+			end
 		end
 	end
 
