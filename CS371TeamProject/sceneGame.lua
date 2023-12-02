@@ -237,6 +237,7 @@ function scene:show(event)
 	-- Function to handle collisions between the player character and other objects
 	local function playerHit(event)
 		if event.phase == "began" then
+			audio.play( soundTable["hitSound"] );
 			health = health - 1;
 			textNum2.text = health
 			if(health <= 0) then
